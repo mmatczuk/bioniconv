@@ -1,14 +1,7 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+use std::{error, io};
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn process_epub<R: io::Read + io::Seek>(reader: R) -> Result<(), Box<dyn error::Error>> {
+    let a = zip::ZipArchive::new(reader).unwrap();
+    println!("{}", a.len());
+    Ok(())
 }
