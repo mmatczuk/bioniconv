@@ -11,7 +11,7 @@ fn main() {
     }
     let fname = &*args[1];
 
-    let ofname = output_file_name(fname).unwrap_or_else(|| {
+    let ofname = &output_file_name(fname).unwrap_or_else(|| {
         eprintln!("Cannot determine output file name");
         process::exit(1);
     });
@@ -20,7 +20,7 @@ fn main() {
         eprintln!("Cannot open file: {}", err);
         process::exit(1);
     });
-    let mut of = &fs::File::create(ofname).unwrap_or_else(|err| {
+    let of = &fs::File::create(ofname).unwrap_or_else(|err| {
         eprintln!("Cannot open output file {}: {}", ofname, err);
         process::exit(1);
     });
@@ -29,15 +29,10 @@ fn main() {
         eprintln!("Convert error: {}", err);
         process::exit(1);
     });
-
-    of.flush().unwrap_or_else(|err| {
-        eprintln!("Cannot flush output file: {}", err);
-        process::exit(1);
-    });
 }
 
 fn output_file_name(fname: &str) -> Option<String> {
     Path::new(fname)
         .file_name()
-        .map(|name| format!("bionic_{}", name.to_string_lossy()))
+        .map(|name| format!("bionic_{}.zip", name.to_string_lossy()))
 }
