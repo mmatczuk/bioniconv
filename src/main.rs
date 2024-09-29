@@ -1,20 +1,43 @@
 use bionicread;
+use std::io::Write;
+use std::path::Path;
 use std::{fs, process};
+
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     if args.len() != 2 {
         eprintln!("Usage: bionicread <file>");
         process::exit(1);
     }
-
     let fname = &*args[1];
-    let f = fs::File::open(fname).unwrap_or_else(|err| {
+
+    let ofname = output_file_name(fname).unwrap_or_else(|| {
+        eprintln!("Cannot determine output file name");
+        process::exit(1);
+    });
+
+    let f = &fs::File::open(fname).unwrap_or_else(|err| {
         eprintln!("Cannot open file: {}", err);
         process::exit(1);
     });
+    let mut of = &fs::File::create(ofname).unwrap_or_else(|err| {
+        eprintln!("Cannot open output file {}: {}", ofname, err);
+        process::exit(1);
+    });
 
-    bionicread::process_epub(f).unwrap_or_else(|err| {
+    bionicread::process_epub(of, f).unwrap_or_else(|err| {
         eprintln!("Convert error: {}", err);
         process::exit(1);
     });
+
+    of.flush().unwrap_or_else(|err| {
+        eprintln!("Cannot flush output file: {}", err);
+        process::exit(1);
+    });
+}
+
+fn output_file_name(fname: &str) -> Option<String> {
+    Path::new(fname)
+        .file_name()
+        .map(|name| format!("bionic_{}", name.to_string_lossy()))
 }
