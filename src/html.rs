@@ -58,7 +58,7 @@ struct BionicReplacer {
 impl BionicReplacer {
     fn new() -> Self {
         Self {
-            re: regex::Regex::new(r"(\b[\p{L}\p{M}]+\b)").unwrap(),
+            re: regex::Regex::new(r"(^|\s)(\b[\p{L}\p{M}]+\b)").unwrap(),
         }
     }
 
@@ -71,7 +71,14 @@ struct BionicWordReplacer;
 
 impl regex::Replacer for BionicWordReplacer {
     fn replace_append(&mut self, caps: &regex::Captures<'_>, dst: &mut String) {
-        let word = caps.get(1).unwrap().as_str();
+        if caps.len() == 0 {
+            return;
+        }
+
+        let space = caps.get(1).unwrap().as_str();
+        dst.push_str(space);
+
+        let word = caps.get(2).unwrap().as_str();
         if word.len() <= 1 {
             dst.push_str(word);
         } else if word.len() <= 3 {
