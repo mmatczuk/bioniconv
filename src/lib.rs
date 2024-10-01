@@ -1,5 +1,5 @@
 use lol_html::html_content::ContentType;
-use lol_html::{rewrite_str, text, RewriteStrSettings};
+use lol_html::{text, HtmlRewriter, RewriteStrSettings};
 use std::io::{Read, Write};
 use std::{error, io};
 use zip::read::ZipFile;
@@ -54,18 +54,20 @@ fn process_file<W: Write + io::Seek>(
     let mut content = String::new();
     r.read_to_string(&mut content)?;
 
-    let bionic_content = rewrite_str(
-        &content,
+    let mut rewriter = HtmlRewriter::new(
         RewriteStrSettings {
             element_content_handlers: vec![text!("p", |t| {
                 t.replace(&format!("XXXX({})", t.as_str()), ContentType::Html);
                 Ok(())
             })],
             ..RewriteStrSettings::new()
-        },
-    )?;
+        }
+        .into(),
+        |c: &[u8]| w.write_all(c).unwrap(),
+    );
 
-    w.write_all(bionic_content.as_bytes())?;
+    rewriter.write(content.as_bytes())?;
+    rewriter.end()?;
 
     Ok(())
 }
