@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 lol_html = "2.0.0"
+regex = "1.11.0"
 zip = { version = "2.2.0"}
