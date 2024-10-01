@@ -1,9 +1,7 @@
-use lol_html::html_content::ContentType;
-use lol_html::{
-    text, HandlerTypes, HtmlRewriter, LocalHandlerTypes, OutputSink, RewriteStrSettings,
-};
+mod html;
+
 use std::error;
-use std::io::{self, Write};
+use std::io;
 use zip::read::ZipFile;
 use zip::write::SimpleFileOptions;
 use zip::{self, DateTime, ZipArchive, ZipWriter};
@@ -24,7 +22,7 @@ where
         {
             let mut f = za.by_name(&fname)?;
             zw.start_file(f.name(), copy_options(&f))?;
-            process_file(&mut zw, &mut f)?;
+            html::process_file(&mut zw, &mut f)?;
         } else {
             let f = za.by_name(&fname)?;
             zw.raw_copy_file(f)?;
@@ -47,44 +45,4 @@ fn copy_options(file: &ZipFile) -> SimpleFileOptions {
         options = options.unix_permissions(perms);
     }
     options
-}
-
-fn process_file<W: Write + io::Seek>(
-    w: &mut ZipWriter<W>,
-    r: &mut ZipFile,
-) -> Result<(), Box<dyn error::Error>> {
-    let mut rewriter = HtmlRewriterWrapper {
-        inner: HtmlRewriter::new(
-            RewriteStrSettings {
-                element_content_handlers: vec![text!("p", |t| {
-                    t.replace(&format!("XXXX({})", t.as_str()), ContentType::Html);
-                    Ok(())
-                })],
-                ..RewriteStrSettings::new()
-            }
-            .into(),
-            |c: &[u8]| w.write_all(c).unwrap(),
-        ),
-    };
-
-    io::copy(r, &mut rewriter)?;
-
-    Ok(())
-}
-
-// Wrapper around HtmlRewriter that implements io::Write for use with io::copy.
-struct HtmlRewriterWrapper<'h, O: OutputSink, H: HandlerTypes = LocalHandlerTypes> {
-    inner: HtmlRewriter<'h, O, H>,
-}
-impl<'h, O: OutputSink, H: HandlerTypes> Write for HtmlRewriterWrapper<'h, O, H> {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        match self.inner.write(buf) {
-            Ok(_) => Ok(buf.len()),
-            Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
-        }
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
-    }
 }
