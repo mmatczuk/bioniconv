@@ -14,9 +14,7 @@ where
 
     let files: Vec<String> = za.file_names().map(|s| s.to_string()).collect();
     for fname in files {
-        if fname.ends_with("content.opf") {
-            continue;
-        } else if [".html", ".xhtml", "htm"]
+        if [".html", ".xhtml", "htm"]
             .iter()
             .any(|s| fname.ends_with(s))
         {
