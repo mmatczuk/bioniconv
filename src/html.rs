@@ -15,7 +15,7 @@ pub fn process_file<W: Write + io::Seek>(
     let mut rewriter = HtmlRewriterWrapper {
         inner: HtmlRewriter::new(
             RewriteStrSettings {
-                element_content_handlers: vec![text!("p", |t| {
+                element_content_handlers: vec![text!("p,li", |t| {
                     let text = t.as_str();
                     if text.len() > 0 {
                         t.replace(&bionic.replace(text), ContentType::Html);
