@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+lol_html = "2.0.0"
 zip = { version = "2.2.0"}

@@ -1,5 +1,4 @@
 use bionicread;
-use std::io::Write;
 use std::path::Path;
 use std::{fs, process};
 
@@ -34,5 +33,5 @@ fn main() {
 fn output_file_name(fname: &str) -> Option<String> {
     Path::new(fname)
         .file_name()
-        .map(|name| format!("bionic_{}.zip", name.to_string_lossy()))
+        .map(|name| format!("bionic_{}", name.to_string_lossy()))
 }

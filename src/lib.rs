@@ -1,4 +1,6 @@
-use std::io::Write;
+use lol_html::html_content::ContentType;
+use lol_html::{rewrite_str, text, RewriteStrSettings};
+use std::io::{Read, Write};
 use std::{error, io};
 use zip::read::ZipFile;
 use zip::write::SimpleFileOptions;
@@ -18,9 +20,9 @@ where
             .iter()
             .any(|s| fname.ends_with(s))
         {
-            let f = za.by_name(&fname)?;
+            let mut f = za.by_name(&fname)?;
             zw.start_file(f.name(), copy_options(&f))?;
-            process_file(&mut zw, &f);
+            process_file(&mut zw, &mut f)?;
         } else {
             let f = za.by_name(&fname)?;
             zw.raw_copy_file(f)?;
@@ -45,6 +47,25 @@ fn copy_options(file: &ZipFile) -> SimpleFileOptions {
     options
 }
 
-fn process_file<W: Write + io::Seek>(w: &mut ZipWriter<W>, _: &ZipFile) {
-    w.write_all(b"Hello, world!").unwrap();
+fn process_file<W: Write + io::Seek>(
+    w: &mut ZipWriter<W>,
+    r: &mut ZipFile,
+) -> Result<(), Box<dyn error::Error>> {
+    let mut content = String::new();
+    r.read_to_string(&mut content)?;
+
+    let bionic_content = rewrite_str(
+        &content,
+        RewriteStrSettings {
+            element_content_handlers: vec![text!("p", |t| {
+                t.replace(&format!("XXXX({})", t.as_str()), ContentType::Html);
+                Ok(())
+            })],
+            ..RewriteStrSettings::new()
+        },
+    )?;
+
+    w.write_all(bionic_content.as_bytes())?;
+
+    Ok(())
 }
