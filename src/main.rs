@@ -1,11 +1,11 @@
-use bionicread;
+use bioniconv;
 use std::path::Path;
 use std::{fs, process};
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: bionicread <file>");
+        eprintln!("Usage: bioniconv <file>");
         process::exit(1);
     }
     let fname = &*args[1];
@@ -24,7 +24,7 @@ fn main() {
         process::exit(1);
     });
 
-    bionicread::process_epub(of, f).unwrap_or_else(|err| {
+    bioniconv::process_epub(of, f).unwrap_or_else(|err| {
         eprintln!("Convert error: {}", err);
         process::exit(1);
     });
