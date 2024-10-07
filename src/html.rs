@@ -6,7 +6,7 @@ use lol_html::{
 use std::io;
 use std::io::{Read, Write};
 
-pub fn process_file<W: Write, R: Read>(w: &mut W, r: &mut R) -> Result<()> {
+pub fn rewrite_to_bionic<W: Write, R: Read>(w: &mut W, r: &mut R) -> Result<()> {
     let bionic = BionicReplacer::new();
     let mut rewriter = HtmlRewriterWrapper {
         inner: HtmlRewriter::new(

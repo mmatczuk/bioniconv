@@ -48,7 +48,7 @@ where
     fn process_file(&mut self, fname: &str) -> Result<()> {
         let mut f = self.za.by_name(fname)?;
         self.zw.start_file(f.name(), copy_options(&f))?;
-        html::process_file(&mut self.zw, &mut f)?;
+        html::rewrite_to_bionic(&mut self.zw, &mut f)?;
 
         Ok(())
     }
