@@ -1,32 +1,24 @@
+use anyhow::{bail, Context, Result};
+use std::fs;
 use std::path::Path;
-use std::{fs, process};
 
-fn main() {
+fn main() -> Result<()> {
     let args: Vec<_> = std::env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: bioniconv <file>");
-        process::exit(1);
+        bail!("usage: bioniconv <file>");
     }
     let fname = &*args[1];
 
-    let ofname = &output_file_name(fname).unwrap_or_else(|| {
-        eprintln!("Cannot determine output file name");
-        process::exit(1);
-    });
+    let ofname = &output_file_name(fname)
+        .with_context(|| format!("determine output file name for {}", fname))?;
 
-    let f = &fs::File::open(fname).unwrap_or_else(|err| {
-        eprintln!("Cannot open file: {}", err);
-        process::exit(1);
-    });
-    let of = &fs::File::create(ofname).unwrap_or_else(|err| {
-        eprintln!("Cannot open output file {}: {}", ofname, err);
-        process::exit(1);
-    });
+    let f = &fs::File::open(fname).with_context(|| format!("open input file {}", fname))?;
 
-    bioniconv::process_epub(of, f).unwrap_or_else(|err| {
-        eprintln!("Convert error: {}", err);
-        process::exit(1);
-    });
+    let of = &fs::File::create(ofname).with_context(|| format!("open output file {}", ofname))?;
+
+    bioniconv::process_epub(of, f)?;
+
+    Ok(())
 }
 
 fn output_file_name(fname: &str) -> Option<String> {

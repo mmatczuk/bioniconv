@@ -1,16 +1,14 @@
+use anyhow::Result;
 use lol_html::html_content::ContentType;
 use lol_html::{
     text, HandlerTypes, HtmlRewriter, LocalHandlerTypes, OutputSink, RewriteStrSettings,
 };
+use std::io;
 use std::io::Write;
-use std::{error, io};
 use zip::read::ZipFile;
 use zip::ZipWriter;
 
-pub fn process_file<W: Write + io::Seek>(
-    w: &mut ZipWriter<W>,
-    r: &mut ZipFile,
-) -> Result<(), Box<dyn error::Error>> {
+pub fn process_file<W: Write + io::Seek>(w: &mut ZipWriter<W>, r: &mut ZipFile) -> Result<()> {
     let bionic = BionicReplacer::new();
     let mut rewriter = HtmlRewriterWrapper {
         inner: HtmlRewriter::new(
