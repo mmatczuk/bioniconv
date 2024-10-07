@@ -13,10 +13,11 @@ fn main() -> Result<()> {
         .with_context(|| format!("determine output file name for {}", fname))?;
 
     let f = &fs::File::open(fname).with_context(|| format!("open input file {}", fname))?;
-
     let of = &fs::File::create(ofname).with_context(|| format!("open output file {}", ofname))?;
-
-    bioniconv::process_epub(of, f)?;
+    let mut conv = bioniconv::EpubRewriter::new(of, f)
+        .with_context(|| format!("create rewriter for {}", fname))?;
+    conv.rewrite()?;
+    conv.finish()?;
 
     Ok(())
 }
