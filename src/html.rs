@@ -91,3 +91,23 @@ impl regex::Replacer for BionicWordReplacer {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_rewrite_to_bionic() {
+        let tests = vec![
+            ("<p>hello world</p>", "<p><b>he</b>llo <b>wo</b>rld</p>"),
+            ("<li>hello</li>", "<li><b>he</b>llo</li>"),
+        ];
+
+        for (input, expected) in tests {
+            let mut input = input.as_bytes();
+            let mut output = Vec::new();
+            rewrite_to_bionic(&mut output, &mut input).unwrap();
+            assert_eq!(String::from_utf8(output).unwrap(), expected);
+        }
+    }
+}
