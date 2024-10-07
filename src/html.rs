@@ -4,11 +4,9 @@ use lol_html::{
     text, HandlerTypes, HtmlRewriter, LocalHandlerTypes, OutputSink, RewriteStrSettings,
 };
 use std::io;
-use std::io::Write;
-use zip::read::ZipFile;
-use zip::ZipWriter;
+use std::io::{Read, Write};
 
-pub fn process_file<W: Write + io::Seek>(w: &mut ZipWriter<W>, r: &mut ZipFile) -> Result<()> {
+pub fn process_file<W: Write, R: Read>(w: &mut W, r: &mut R) -> Result<()> {
     let bionic = BionicReplacer::new();
     let mut rewriter = HtmlRewriterWrapper {
         inner: HtmlRewriter::new(
