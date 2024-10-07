@@ -17,7 +17,7 @@ pub fn process_file<W: Write + io::Seek>(
             RewriteStrSettings {
                 element_content_handlers: vec![text!("p,li", |t| {
                     let text = t.as_str();
-                    if text.len() > 0 {
+                    if !text.is_empty() {
                         t.replace(&bionic.replace(text), ContentType::Html);
                     }
                     Ok(())

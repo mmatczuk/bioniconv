@@ -1,4 +1,3 @@
-use bioniconv;
 use std::path::Path;
 use std::{fs, process};
 
