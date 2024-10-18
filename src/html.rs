@@ -77,19 +77,27 @@ impl regex::Replacer for BionicWordReplacer {
         let word = caps.get(2).unwrap().as_str();
         if word.len() <= 1 {
             dst.push_str(word);
-        } else if word.len() <= 3 {
-            dst.push_str("<b>");
-            dst.push_str(&word[..1]);
-            dst.push_str("</b>");
-            dst.push_str(&word[1..]);
         } else {
-            let midpoint = word.len() / 2;
+            let midpoint = midpoint(word);
             dst.push_str("<b>");
             dst.push_str(&word[..midpoint]);
             dst.push_str("</b>");
             dst.push_str(&word[midpoint..]);
         }
     }
+}
+
+fn midpoint(word: &str) -> usize {
+    let mut midpoint;
+    if word.len() <= 3 {
+        midpoint = 1;
+    } else {
+        midpoint = word.len() / 2;
+    }
+    while !word.is_char_boundary(midpoint) {
+        midpoint += 1;
+    }
+    midpoint
 }
 
 #[cfg(test)]
