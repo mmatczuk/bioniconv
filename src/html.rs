@@ -75,29 +75,35 @@ impl regex::Replacer for BionicWordReplacer {
         dst.push_str(space);
 
         let word = caps.get(2).unwrap().as_str();
-        if word.len() <= 1 {
+        let idx = split_at(word);
+        if idx == 0 {
             dst.push_str(word);
         } else {
-            let midpoint = midpoint(word);
             dst.push_str("<b>");
-            dst.push_str(&word[..midpoint]);
+            dst.push_str(&word[..idx]);
             dst.push_str("</b>");
-            dst.push_str(&word[midpoint..]);
+            dst.push_str(&word[idx..]);
         }
     }
 }
 
-fn midpoint(word: &str) -> usize {
-    let mut midpoint;
-    if word.len() <= 3 {
-        midpoint = 1;
-    } else {
-        midpoint = word.len() / 2;
+fn split_at(word: &str) -> usize {
+    let n = match word.chars().count() {
+        c if c <= 1 => 0,
+        c if c <= 3 => 1,
+        c if c <= 8 => 2,
+        c if c <= 12 => 4,
+        _ => 5,
+    };
+    if n == 0 {
+        return 0;
     }
-    while !word.is_char_boundary(midpoint) {
-        midpoint += 1;
-    }
-    midpoint
+
+    word.char_indices()
+        .skip(n)
+        .next()
+        .map(|(p, _)| p)
+        .expect(word)
 }
 
 #[cfg(test)]
@@ -107,15 +113,23 @@ mod tests {
     #[test]
     fn test_rewrite_to_bionic() {
         let tests = vec![
-            ("<p>hello world</p>", "<p><b>he</b>llo <b>wo</b>rld</p>"),
-            ("<li>hello</li>", "<li><b>he</b>llo</li>"),
+            ("The", "<b>T</b>he"),
+            ("Bionic", "<b>Bi</b>onic"),
+            ("reading", "<b>re</b>ading"),
+            ("method", "<b>me</b>thod"),
+            ("can", "<b>c</b>an"),
+            ("be", "<b>b</b>e"),
+            ("individually", "<b>indi</b>vidually"),
+            ("flexibility", "<b>flex</b>ibility"),
+            ("customization", "<b>custo</b>mization"),
+            ("highlighted", "<b>high</b>lighted"),
         ];
-
         for (input, expected) in tests {
+            let input = format!("<p>{}</p>", input);
             let mut input = input.as_bytes();
             let mut output = Vec::new();
             rewrite_to_bionic(&mut output, &mut input).unwrap();
-            assert_eq!(String::from_utf8(output).unwrap(), expected);
+            assert_eq!(String::from_utf8(output).unwrap(), format!("<p>{}</p>", expected));
         }
     }
 }
