@@ -54,7 +54,7 @@ struct BionicReplacer {
 impl BionicReplacer {
     fn new() -> Self {
         Self {
-            re: regex::Regex::new(r"(^|\s)(\b[\p{L}\p{M}]+\b)").unwrap(),
+            re: regex::Regex::new(r"(^|\s)(\b[\p{L}\p{M}-]+\b)").unwrap(),
         }
     }
 
